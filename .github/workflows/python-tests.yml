@@ -3,8 +3,26 @@ name: Python CI
 on:
   push:
     branches: [ main ]
+    paths-ignore:
+      - '**/*.md'
+      - '**/*.adoc'
+      - 'docs/**'
+      - '**/*.png'
+      - '**/*.jpg'
+      - '**/*.jpeg'
+      - '**/*.gif'
+      - '**/*.svg'
   pull_request:
     branches: [ main ]
+    paths-ignore:
+      - '**/*.md'
+      - '**/*.adoc'
+      - 'docs/**'
+      - '**/*.png'
+      - '**/*.jpg'
+      - '**/*.jpeg'
+      - '**/*.gif'
+      - '**/*.svg'
 
 concurrency:
   group: ci-${{ github.ref }}

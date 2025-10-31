@@ -1,4 +1,7 @@
 = AI Document Assistant
+
+image::https://raw.githubusercontent.com/thapamanish/ai-doc-assistant/main/docs/ui-interface.png[alt="AI Document Assistant UI", width=800, align=center]
+
 :toc:
 :toclevels: 2
 :icons: font
@@ -147,7 +150,7 @@ The project uses *GitHub Actions* for automated testing and linting.
 Each commit triggers a pipeline that runs `pytest`, `flake8`, and `black` checks.
 
 To view the pipeline details or logs, visit the link below:
-link:https://github.com/<your-github-username>/<your-repo-name>/actions[GitHub Actions – CI Pipeline]
+link:https://github.com/thapamanish/ai-doc-assistant/actions[GitHub Actions – CI Pipeline]
 
 == Troubleshooting
 
