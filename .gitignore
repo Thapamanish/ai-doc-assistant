@@ -61,4 +61,12 @@ Thumbs.db
 *.pdf
 
 # Logs
-*.log 
+*.log
+
+# Coverage / test artifacts
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+.cache/
+pytest_cache/

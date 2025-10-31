@@ -2,23 +2,23 @@ import os
 import pytest
 import tempfile
 from unittest.mock import patch, MagicMock
-from typing import List, Dict, Any, Optional, Union
+from typing import List, Dict, Any, Optional
 import numpy as np
-from langchain.schema import Document, AIMessage
 
 from document_processor import DocumentProcessor
 from vector_store import VectorStore
 from rag import RAG
 
-class MockDocument(Document):
-    """Mock LangChain document for testing."""
-    
+
+class MockDocument:
+    """Lightweight mock document for testing."""
     def __init__(self, page_content: str, metadata: Optional[Dict[str, Any]] = None):
-        super().__init__(page_content=page_content, metadata=metadata or {})
+        self.page_content = page_content
+        self.metadata = metadata or {}
 
 
 @pytest.fixture
-def sample_documents() -> List[Document]:
+def sample_documents() -> List[MockDocument]:
     """Create sample documents for testing."""
     return [
         MockDocument(
@@ -39,17 +39,11 @@ def sample_documents() -> List[Document]:
 @pytest.fixture
 def mock_pdf_file():
     """Create a temporary mock PDF file for testing."""
-    # Create a simple PDF-like content
     content = b"%PDF-1.4\n1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n"
-    
-    # Create a temporary file
     with tempfile.NamedTemporaryFile(suffix='.pdf', delete=False) as temp_file:
         temp_file.write(content)
         temp_file_path = temp_file.name
-    
     yield temp_file_path
-    
-    # Clean up the temporary file
     if os.path.exists(temp_file_path):
         os.remove(temp_file_path)
 
@@ -63,15 +57,14 @@ def document_processor() -> DocumentProcessor:
 @pytest.fixture
 def mock_sentence_transformer():
     """Create a mock SentenceTransformer for testing."""
-    with patch('sentence_transformers.SentenceTransformer', autospec=True) as mock:
-        # Configure the mock
+    with patch('vector_store.SentenceTransformer', autospec=True) as mock:
         instance = MagicMock()
         instance.get_sentence_embedding_dimension.return_value = 384
         instance.encode = MagicMock(return_value=np.array([
             [0.1] * 384,
             [0.2] * 384,
             [0.3] * 384,
-        ]))
+            ]))
         mock.return_value = instance
         yield mock
 
@@ -83,20 +76,19 @@ def vector_store(mock_sentence_transformer) -> VectorStore:
 
 
 @pytest.fixture
-def mock_openai():
-    """Create a mock OpenAI client for testing."""
-    with patch('langchain_openai.ChatOpenAI', autospec=True) as mock:
-        # Configure the mock response
-        instance = MagicMock()
-        
-        response = AIMessage(content="This is a mock response from the language model.")
-        
-        instance.invoke = MagicMock(return_value=response)
-        mock.return_value = instance
-        yield mock
+def mock_gemini():
+    """Create a mock Gemini client for testing (matches google.generativeai)."""
+    with patch('rag.genai.GenerativeModel', autospec=True) as MockModel:
+        model_instance = MockModel.return_value
+        # Prepare a mock response object
+        mock_response = MagicMock()
+        # Tests in test_rag expect generations[0].text = "Generated answer"
+        mock_response.generations = [MagicMock(text="Generated answer")]
+        model_instance.generate_content.return_value = mock_response
+        yield MockModel
 
 
 @pytest.fixture
-def rag_instance(vector_store, mock_openai) -> RAG:
-    """Create a RAG instance with a mocked vector store and language model."""
-    return RAG(vector_store) 
+def rag_instance(vector_store, mock_gemini) -> RAG:
+    """Create a RAG instance with a mocked vector store and Gemini model."""
+    return RAG(vector_store)
