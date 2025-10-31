@@ -11,75 +11,49 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  lint:
-    name: Lint (flake8)
+  lint_type:
+    name: Lint + Typecheck
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: '3.11'
           cache: 'pip'
-          cache-dependency-path: |
-            requirements.txt
-            requirements-dev.txt
-      - name: Install dependencies
+          cache-dependency-path: requirements-dev.txt
+      - name: Install dev deps only
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install -r requirements-dev.txt
-      - name: flake8 (errors only)
-        run: flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-      - name: flake8 (full report, non-blocking)
-        run: flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-
-  typecheck:
-    name: Type Check (mypy)
-    runs-on: ubuntu-latest
-    needs: lint
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-          cache: 'pip'
-          cache-dependency-path: |
-            requirements.txt
-            requirements-dev.txt
-      - name: Install dependencies
+          pip install -r requirements-dev.txt --disable-pip-version-check
+      - name: flake8
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install -r requirements-dev.txt
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
       - name: mypy
         run: mypy --ignore-missing-imports .
 
   test:
-    name: Test (pytest + coverage)
+    name: Tests + Coverage
     runs-on: ubuntu-latest
-    needs: typecheck
+    needs: lint_type
     env:
       GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY || 'local-dev-dummy-key' }}
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: '3.11'
           cache: 'pip'
           cache-dependency-path: |
             requirements.txt
             requirements-dev.txt
-      - name: Install dependencies
+      - name: Install runtime + dev deps
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install -r requirements-dev.txt
-      - name: Run tests
+          pip install -r requirements.txt -r requirements-dev.txt --disable-pip-version-check
+      - name: pytest
         run: pytest -q --cov=. --cov-report=xml
-      - name: Upload coverage to Codecov
+      - name: Codecov
         uses: codecov/codecov-action@v4
         with:
           files: ./coverage.xml
