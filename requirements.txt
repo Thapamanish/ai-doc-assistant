@@ -15,7 +15,7 @@ python-dotenv>=1.0.0,<2.0.0
 pydantic>=2.0.0,<3.0.0
 reportlab>=4.0.0,<5.0.0
 
-# UI Framework (optional)
+# UI Framework
 streamlit>=1.37.0,<2.0.0
 
 # Gemini (Google Generative AI)
