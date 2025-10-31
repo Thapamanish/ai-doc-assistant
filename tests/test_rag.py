@@ -1,71 +1,63 @@
 import pytest
 from unittest.mock import patch, MagicMock
+from google import genai
 
 from rag import RAG
-from langchain.schema import HumanMessage, SystemMessage
 
 
 class TestRAG:
-    
-    @patch('rag.ChatOpenAI')
-    def test_init(self, mock_openai, vector_store):
-        """Test RAG initialization."""
-        # Create a new RAG instance
+
+    @patch('rag.genai')  # Patch the google generativeai module used in RAG
+    def test_init(self, mock_genai, vector_store):
+        """Test RAG initialization with Gemini API."""
+        mock_genai.configure = MagicMock()
+        mock_model = MagicMock()
+        mock_genai.GenerativeModel.return_value = mock_model
+
         rag = RAG(vector_store)
-        
-        # Verify vector store was set
+
+        # Verify vector store assigned
         assert rag.vector_store == vector_store
-        
-        # Verify ChatOpenAI was initialized correctly
-        mock_openai.assert_called_once_with(model_name="gpt-3.5-turbo")
-    
+
+        # Verify configure called once with an API key
+        mock_genai.configure.assert_called_once()
+
+        # Verify GenerativeModel called with valid model name
+        mock_genai.GenerativeModel.assert_called_once_with("gemini-2.5-flash")
+
+        # Verify model assigned
+        assert rag.model == mock_model
+
     def test_generate_answer_no_docs(self, rag_instance):
         """Test generate_answer when no documents are found."""
-        # Mock the vector store to return no documents
         rag_instance.vector_store.similarity_search = MagicMock(return_value=[])
-        
-        # Generate answer
-        answer = rag_instance.generate_answer("What is artificial intelligence?")
-        
-        # Verify similarity search was called
-        rag_instance.vector_store.similarity_search.assert_called_once_with(
-            "What is artificial intelligence?", k=4
-        )
-        
-        # Verify the response when no documents are found
+
+        answer = rag_instance.generate_answer("What is AI?")
+
+        rag_instance.vector_store.similarity_search.assert_called_once_with("What is AI?", k=4)
         assert "No relevant information found" in answer
-    
-    def test_generate_answer(self, rag_instance, sample_documents):
-        """Test generate_answer with documents."""
-        # Mock the vector store to return documents
+
+    def test_generate_answer_with_docs(self, rag_instance, sample_documents):
+        """Test generate_answer with documents and Gemini API response."""
         rag_instance.vector_store.similarity_search = MagicMock(return_value=sample_documents)
-        
-        # Mock the model's response
-        mock_response = MagicMock()
-        mock_response.content = "Test response"
-        rag_instance.model = MagicMock()
-        rag_instance.model.invoke.return_value = mock_response
-        
-        # Generate answer
-        query = "What is artificial intelligence?"
+
+        # Mock model.generate_content response
+        mock_generation_response = MagicMock()
+        mock_generation_response.generations = [MagicMock(text="Generated answer")]
+        rag_instance.model.generate_content = MagicMock(return_value=mock_generation_response)
+
+        query = "What is AI?"
         answer = rag_instance.generate_answer(query, k=2)
-        
-        # Verify similarity search was called
+
         rag_instance.vector_store.similarity_search.assert_called_once_with(query, k=2)
-        
-        # Verify LLM invocation
-        assert rag_instance.model.invoke.call_count == 1
-        
-        # Verify response was returned
-        assert answer == "Test response"
-    
+        rag_instance.model.generate_content.assert_called_once()
+
+        assert answer == "Generated answer"
+
     @patch('dotenv.load_dotenv')
     def test_dotenv_loaded(self, mock_load_dotenv):
-        """Test that environment variables are loaded."""
-        # Import the module again to trigger load_dotenv
         import importlib
         import rag as rag_module
         importlib.reload(rag_module)
-        
-        # Verify load_dotenv was called
-        mock_load_dotenv.assert_called_once() 
+
+        mock_load_dotenv.assert_called_once()

@@ -1,0 +1,174 @@
+= AI Document Assistant
+:toc:
+:toclevels: 2
+:icons: font
+
+image::https://github.com/thapamanish/ai-doc-assistant/actions/workflows/python-tests.yml/badge.svg[Build Status, link="https://github.com/<your-github-username>/<your-repo-name>/actions/workflows/ci.yml"]
+
+An intelligent document analysis tool that helps you find answers from your PDF documents using semantic search and AI-powered question answering.
+
+== What It Does
+
+Upload your PDFs, ask questions in plain English, and get accurate answers pulled directly from your documents.  
+The system understands *context and meaning*, not just keywords.
+
+== Key Features
+
+* *PDF Support* – Upload and process multiple PDF documents
+* *Smart Search* – Finds relevant information using semantic understanding
+* *Contextual Answers* – Generates responses based on actual document content
+* *Conversation Tracking* – Keeps a history of your questions and answers
+* *Flexible Settings* – Adjust processing parameters for optimal results
+* *Clean Interface* – Simple, intuitive design built with Streamlit
+
+== Tech Stack
+
+* Python 3.12
+* Streamlit (UI framework)
+* LangChain (document processing & RAG)
+* FAISS (vector similarity search)
+* Sentence Transformers (text embeddings)
+* *Google Gemini (Generative AI)* – for answer generation
+* PyPDF (PDF text extraction)
+
+== Requirements
+
+* Python 3.12+
+* *GEMINI_API_KEY* (Google Generative AI)
+* 2GB+ RAM (recommended)
+
+== Setup Instructions
+
+=== 1. Clone this repository
+[source,bash]
+----
+git clone <your-repo-url>
+cd ai-document-assistant
+----
+
+=== 2. Create a virtual environment
+[source,bash]
+----
+python -m venv venv
+
+# Windows
+venv\Scripts\activate
+
+# Mac/Linux
+source venv/bin/activate
+----
+
+=== 3. Install dependencies
+[source,bash]
+----
+pip install -r requirements.txt
+----
+
+=== 4. Add your Gemini API key
+Create a `.env` file in the project root with the following content:
+----
+GEMINI_API_KEY=your-gemini-api-key-here
+----
+
+=== 5. Launch the app
+[source,bash]
+----
+streamlit run app.py
+----
+
+Then open your browser to http://localhost:8501
+
+== How to Use
+
+. *Upload Documents* – Select your PDF files from the sidebar uploader
+. *Configure Settings (Optional)* – Adjust chunk size and overlap
+. *Process* – Click *Process Documents* to analyze your PDFs
+. *Ask Questions* – Type a question and press Enter
+. *Review Answers* – See AI-generated responses sourced from your documents
+
+== How It Works
+
+The system uses *Retrieval-Augmented Generation (RAG)*:
+
+. *Text Extraction* – Extracts text from PDFs
+. *Chunking* – Splits text into overlapping sections
+. *Embedding* – Converts chunks into numerical vectors
+. *Indexing* – Stores vectors in a FAISS index for fast search
+. *Retrieval* – Finds relevant chunks for your query
+. *Generation* – Sends retrieved context to Gemini to generate answers
+
+== Configuration Options
+
+[cols="1,2,1", options="header"]
+|===
+| Setting | Description | Default
+| Chunk Size | Characters per text chunk | 1000
+| Chunk Overlap | Overlap between chunks | 200
+|===
+
+TIP: Larger chunks = more context but slower processing.  
+Smaller chunks = faster but may lose coherence.
+
+== Development
+
+=== Install dev dependencies
+[source,bash]
+----
+pip install -r requirements-dev.txt
+----
+
+=== Run tests
+[source,bash]
+----
+pytest
+----
+
+=== Format and lint
+[source,bash]
+----
+black .
+flake8 .
+----
+
+=== Test Overview
+[cols="2,4", options="header"]
+|===
+| Test File | Purpose
+| test_app.py | Streamlit app and session state logic
+| test_rag.py | RAG logic and Gemini integration
+| test_vector_store.py | FAISS and embeddings
+| test_document_processor.py | PDF loading and chunking
+| conftest.py | Shared test fixtures
+|===
+
+== CI/CD Pipeline
+
+The project uses *GitHub Actions* for automated testing and linting.  
+Each commit triggers a pipeline that runs `pytest`, `flake8`, and `black` checks.
+
+To view the pipeline details or logs, visit the link below:
+link:https://github.com/<your-github-username>/<your-repo-name>/actions[GitHub Actions – CI Pipeline]
+
+== Troubleshooting
+
+*“File path <MagicMock> is not a valid file or URL”* +
+→ Occurs only in tests — ensure mocks and fixtures are active.
+
+*Slow processing* +
+→ Reduce chunk size or upload fewer documents.
+
+*Gemini API errors* +
+→ Confirm your `GEMINI_API_KEY` is valid and active in your Google Cloud project.
+
+== License
+
+MIT License — feel free to use and modify this project as you wish.
+
+== Built With
+
+* https://ai.google.dev/[Google Gemini API]
+* https://streamlit.io/[Streamlit]
+* https://www.langchain.com/[LangChain]
+* https://github.com/facebookresearch/faiss[FAISS]
+* https://www.sbert.net/[Sentence Transformers]
+* https://pypi.org/project/pypdf/[PyPDF]

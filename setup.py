@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-with open("README.md", "r", encoding="utf-8") as fh:
+with open("README.adoc", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setup(
@@ -11,7 +11,7 @@ setup(
     description="A document processing system with RAG architecture",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/username/document-assistant",
+    url="https://github.com/thapamanish/ai-doc-assistant",
     packages=find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",
@@ -21,8 +21,7 @@ setup(
     python_requires=">=3.8",
     install_requires=[
         "langchain==0.0.267",
-        "langchain-openai==0.0.2",
-        "openai==1.3.5",
+        "google-genai",
         "faiss-cpu==1.7.4",
         "sentence-transformers==2.2.2",
         "numpy==1.24.3",
