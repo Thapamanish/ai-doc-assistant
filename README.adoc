@@ -3,7 +3,7 @@
 :toclevels: 2
 :icons: font
 
-image::https://github.com/thapamanish/ai-doc-assistant/actions/workflows/python-tests.yml/badge.svg[Build Status, link="https://github.com/<your-github-username>/<your-repo-name>/actions/workflows/ci.yml"]
+image::https://github.com/thapamanish/ai-doc-assistant/actions/workflows/python-tests.yml/badge.svg?branch=main[Build Status, link="https://github.com/thapamanish/ai-doc-assistant/actions/workflows/python-tests.yml?query=branch%3Amain"]
 
 An intelligent document analysis tool that helps you find answers from your PDF documents using semantic search and AI-powered question answering.
 
